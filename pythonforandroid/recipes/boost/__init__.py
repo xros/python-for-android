@@ -2,8 +2,10 @@ from pythonforandroid.toolchain import Recipe, shprint, shutil, current_director
 from os.path import join, exists
 import sh
 
-# This recipe creates a custom toolchain and bootstraps Boost from source to build Boost.Build
-# including python bindings
+"""
+This recipe creates a custom toolchain and bootstraps Boost from source to build Boost.Build
+including python bindings
+"""
 class BoostRecipe(Recipe):
     version = '1.60.0'
     # Don't forget to change the URL when changing the version
@@ -28,9 +30,9 @@ class BoostRecipe(Recipe):
                     '--install-dir=' + env['CROSSHOME'],
                     '--system=' + 'linux-x86_64'
             )
-            # Install app stl
-            shutil.copyfile(join(env['CROSSHOME'], env['CROSSHOST'], 'lib/libgnustl_shared.so'),
-                            join(self.ctx.get_libs_dir(arch.arch), 'libgnustl_shared.so'))
+            # Set custom configuration
+            shutil.copyfile(join(self.get_recipe_dir(), 'user-config.jam'),
+                            join(env['BOOST_BUILD_PATH'], 'user-config.jam'))
 
     def build_arch(self, arch):
         super(BoostRecipe, self).build_arch(arch)
@@ -43,15 +45,15 @@ class BoostRecipe(Recipe):
                     '--with-python-version=2.7',
                     '--with-python-root=' + env['PYTHON_ROOT']
             )  # Do not pass env
-            shutil.copyfile(join(self.get_recipe_dir(), 'user-config.jam'),
-                            join(env['BOOST_BUILD_PATH'], 'user-config.jam'))
+        # Install app stl
+        shutil.copyfile(join(env['CROSSHOME'], env['CROSSHOST'], 'lib/libgnustl_shared.so'),
+                        join(self.ctx.get_libs_dir(arch.arch), 'libgnustl_shared.so'))
 
     def select_build_arch(self, arch):
-        return arch.arch.replace('eabi', '')
+        return arch.arch.replace('eabi-v7a', '').replace('eabi', '')
 
     def get_recipe_env(self, arch):
         env = super(BoostRecipe, self).get_recipe_env(arch)
-        #env['OPENSSL_BUILD_PATH'] = self.get_recipe('openssl', self.ctx).get_build_dir(arch.arch)
         env['BOOST_BUILD_PATH'] = self.get_build_dir(arch.arch)  # find user-config.jam
         env['BOOST_ROOT'] = env['BOOST_BUILD_PATH']  # find boost source
         env['PYTHON_ROOT'] = self.ctx.get_python_install_dir()
@@ -61,5 +63,6 @@ class BoostRecipe(Recipe):
         env['CROSSHOME'] = join(env['BOOST_ROOT'], 'standalone-' + env['ARCH'] + '-toolchain')
         env['TOOLCHAIN_PREFIX'] = join(env['CROSSHOME'], 'bin', env['CROSSHOST'])
         return env
+
 
 recipe = BoostRecipe()

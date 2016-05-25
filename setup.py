@@ -31,12 +31,14 @@ def recursively_include(results, directory, patterns):
 
 recursively_include(package_data, 'pythonforandroid/recipes',
                     ['*.patch', 'Setup*', '*.pyx', '*.py', '*.c', '*.h',
-                     '*.mk', ])
+                     '*.mk', '*.jam', ])
 recursively_include(package_data, 'pythonforandroid/bootstraps',
                     ['*.properties', '*.xml', '*.java', '*.tmpl', '*.txt', '*.png',
                      '*.mk', '*.c', '*.h', '*.py', '*.sh', '*.jpg', '*.aidl', ])
 recursively_include(package_data, 'pythonforandroid/bootstraps',
                     ['sdl-config', ])
+recursively_include(package_data, 'pythonforandroid/bootstraps/webview',
+                    ['*.html', ])
 recursively_include(package_data, 'pythonforandroid',
                     ['liblink', 'biglink', 'liblink.sh'])
 
@@ -47,7 +49,7 @@ setup(name='python-for-android',
       author_email='kivy-dev@googlegroups.com',
       url='https://github.com/kivy/python-for-android', 
       license='MIT', 
-      install_requires=['appdirs', 'colorama>0.3', 'sh', 'jinja2', 'argparse',
+      install_requires=['appdirs', 'colorama>=0.3.3', 'sh>=1.10', 'jinja2', 'argparse',
                         'six'],
       entry_points={
           'console_scripts': [
